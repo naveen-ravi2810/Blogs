@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="celery.css">
+    <title>When I use Celery</title>
+</head>
+<body>
+    <nav id="navbar">Naveen Ravi's Blog here</nav>
+
+    <!-- Start Main-div -->
+    <div id="main-div">
+
+        <!-- Start Content-Div -->
+       
+        <div id="content-div">
+
+            <h1 id="title">What is Celery and where It helped me</h1>
+            <img src="./assets/celery_not_leaf.png" alt="title image" />
+            <p style="text-align: center;">Figure 1.1</p>
+
+            
+            <div id="why-post">
+                <h3>Why this Post ?</h3>
+                <p>
+                    Most of the time I browse to others github I found a new command  
+                    <span id="command"> celery -A celery_worker worker --pool=solo --loglevel=info</span>
+                    from other github. <br/>
+                    I just gone through it. And Found zero use case in my small projects.
+                    <br/>
+                    Finally today [19th March 2024] I had time to use it in my project.
+                </p>
+            </div>
+
+
+            <div id="problem-faced">
+                <h3>The Problem I faced</h3>
+                <p>
+                    In my Application there is an endpoint to send otp to the particular email for their registration.
+                    It worked on my Localhost well and takes <span style="font-weight: bold;">5.94sec</span> <span>as refered in figure 1.2</span>. But this time
+                    I felt bad that wheather the user need to wait for 5 sec for the server process. So Their come the 
+                    use of <a href="https://docs.celeryq.dev/en/stable/" target="_blank">celery</a> .
+                </p>
+                <img src="./assets/time_for_without_celery.png" alt="time_for_without_celery" width="100%" height="800px">
+                <p style="text-align: center;">Figure 1.2</p>
+            </div>
+            
+            
+            <div id="How-I-resolved-it">
+                <h3>How I resolved it</h3>
+                <img  src="./assets/email_verification_endpoint.png" alt="email_verification_endpoint"/>
+                <p>Figure 1.3</p>
+                <img src="./assets/send_otp_to_email_for_registration_function.png" alt="send_otp_to_email_for_registration_function"/>    
+                <p>Figure 1.4</p>
+                <p>
+                    This <a href="https://github.com/naveen-ravi2810/Conduct_Backend" target="_blank">application</a> was written 
+                    in <a href="https://fastapi.tiangolo.com/" target="_blank">FastAPI</a>. with it own in build <a href="https://docs.pydantic.dev/latest/" target="_blank">Pydantic</a>
+                    and the same <a href="https://www.linkedin.com/in/tiangolo/" target="_blank">developer</a>'s <a href="https://sqlmodel.tiangolo.com/" target="_blank">SQLModel</a>. 
+                    I used <a href="https://www.postgresql.org/" target="_blank">PostgreSQL</a> as main Database and <a href="https://redis.io/" target="_blank">Redis</a> as a cache memory.
+                    The Email Verification Endpoint with the function is present in Above figure 1.3 and figure 1.4 respectively.
+                </p>
+                <h4>Finally getting in to send_otp() function</h4>
+                <img src="./assets/Send_otp_function.png" alt="Send_otp_function"/>
+                <p style="text-align: center;;">Figure 1.5</p>
+                <p>
+                    And there you can find <i>Email_sender_id</i> which sends the email to the user.
+                    <i>Email_sender_password</i> is which the smtp provider gives the passcode for the particular email.
+                    There we can find open a html file named <b>otp_template.html</b> which has the mail template that should be send to the user.
+                    According to application hierarchy** from <b>Backend</b> directory. 
+                </p>
+            </div>
+            
+            
+            <div id="celery-helps">
+                <h3>Celery helps</h3>
+                <p>Celery helps me to make the response for the <b>/email_verification</b> endpoint.
+                    As celery takes response for being a broker and assigning task to the redis.
+                    <br/>
+                    and I can see the task details in <a href="https://flower.readthedocs.io/en/latest/" target="_blank">flower</a>.
+                    <h3>Let see the celery code and know more about it.</h3>
+                    <br/>
+                    <img src="./assets/celery_send_otp_to_email_for_registration_function.png" alt="celery_send_otp_to_email_for_registration_function"/>
+                    <p style="text-align: center;">Figure 1.6</p>
+                    <br/>
+                    <p>
+                        This is tthe update code of figure 1.4 which has configuration without celery. Now the updated code has a new 
+                        method <b>delay</b> during the send_otp function call.
+                        This make call to the below altered send_otp function with celery config refered in below figure 1.7.
+                    </p>
+                    <img width="100%" src="./assets/celery_send_otp.png" alt="celery_send_otp"/>
+                    <p style="text-align: center;">Figure 1.7</p>
+                </p>
+            </div>
+
+
+            <div>
+                <h3>Lets break down the code</h3>
+                <p>
+                    <table>
+                        <tbody>
+
+                            <tr>
+                                <td>
+                                    <h4> Step 1</h4>
+                                </td>
+                                <td>
+                                    <h3>Import necessary modules</h3>
+                                    <p>
+                                        <b>smtplib</b> to access email service <br>
+                                        <b>email.mime</b> to send MIME type html file <br>
+                                        <b>celery</b> to use celery broker <br>
+                                        <b>app.core</b> to get the pydantic_setting variables and redis_connection to store otp
+                                    </p>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <h4> Step 2</h4>
+                                </td>
+                                <td>
+                                    <h3>Configure celery</h3>
+                                    <p>
+                                        setting the celery config with a inital name and broker_uri and backend_uri 
+                                        which i provide here as reidis_uri with different db not the otp_storage db.
+                                    </p>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <h4> Step 3</h4>
+                                </td>
+                                <td>
+                                    <h3>Create main send_otp function</h3>
+                                    <p>
+                                        using the celery_app decorator with method task which I initialzed in previous step 2.
+                                        after that the function call the another function send_email with the parameter email and otp.
+                                        once the OTP is send to the new_user_email address the otp is stored in redis_cache which is another redis_db. 
+
+                                    </p>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <h4> Step 4</h4>
+                                </td>
+                                <td>
+                                    <h3>call send_email function</h3>
+                                    <p>
+                                        As I told early in step 3 the send_email function carry email and otp as paramter . 
+                                        and it send email to the user by starting SMTP server and with the template in otp_template.html file.
+                                        Here is the email sending setup with smtplib using python .
+                                    </p>
+                                </td>
+                            </tr>
+
+
+                        </tbody>
+                    </table>
+                </p>
+            </div>
+
+
+            <div>
+                <h3>Final output / Result</h3>
+                <p>
+                    Now the application is start after the setting up of .env files with neccessary file.
+                    And the same command that I provided early was entered by me. <br> <br>
+                    <span id="command">uvicorn main:app --reload</span> <br> <br> to start the application <br> <br>
+                    <span id="command"> celery -A app.modules.utils worker --pool=solo --loglevel=info</span> <br> <br>** to start celery_worker according my path directory. <br> <br>
+                    <span id="command"> celery -A app.core.celery_worker flower --port=5555</span> <br> <br> start flower in port 5555 to visualize the task status. <br> <br>
+
+
+                    After sending request to <b>/email_verification</b> endpoint. I found the response time as <b>44.53 ms</b> as referred in below figure 1.8 which is <b>0.88%</b> faster than response which used used without celery.
+                </p>
+                <img width="100%" src="./assets/time_for_with_celery.png" alt="time_for_with_celery"/>
+                <br>
+                <p>Hence the response is faster but the email recieve from the smtp service provider will be the same😊😊. </p>
+
+                <p>The good is the server can send response faster and the user no need to wait from the response.</p>
+                
+            </div>
+
+
+            <div>
+                <p>For more detailed view of the application view project repo <a href="https://github.com/naveen-ravi2810/Conduct_Backend" target="_blank">https://github.com/naveen-ravi2810/Conduct_Backend</a> .</p>
+            </div>
+
+        </div>
+
+       <!-- End Content-Div -->
+
+    </div>
+
+    <!-- End Main-div -->
+
+
+    <!-- Start Footer-div -->
+
+    <footer>
+
+        <div>
+            <p>
+                ** denotes found in <a href="https://github.com/naveen-ravi2810/Conduct_Backend">project github repo</a>
+            </p>
+            <h3>
+                My Links
+            </h3>
+            <p>
+                <a href="https://www.linkedin.com/in/naveen-ravi-chandran-258234220/" target="_blank">LinkedIn</a>
+                <a href="http://naveenravi.onrender.com/" target="_blank">Portfolio</a>
+            </p>
+        </div>
+
+    </footer>
+
+    <!-- End footer-div -->
+</body>
+</html>
